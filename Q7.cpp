@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+void decrypt(char *ciphertext, char *plaintext, char *mapping) {
+    int i;
+    for (i = 0; ciphertext[i] != '\0'; i++) {
+        if (isalpha(ciphertext[i]))
+            plaintext[i] = mapping[ciphertext[i] - 'A'];
+        else
+            plaintext[i] = ciphertext[i];
+    }
+    plaintext[i] = '\0';
+}
+
+void countFrequencies(char *text, int *freq) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (isalpha(text[i]))
+            freq[toupper(text[i]) - 'A']++;
+    }
+}
+
+char findMostFrequent(int *freq) {
+    int maxFreq = 0;
+    char mostFreqChar = '\0';
+    for (int i = 0; i < 26; i++) {
+        if (freq[i] > maxFreq) {
+            maxFreq = freq[i];
+            mostFreqChar = 'A' + i;
+        }
+    }
+    return mostFreqChar;
+}
+
+int main() {
+    char ciphertext[] = "53‡‡†305))6*;4826)4‡.)4‡);806*;48†8¶60))85;;]8*;:‡*8†83 (88)5*†;46(;88*96*?;8)*‡(;485);5*†2:*‡(;4956*2(5*—4)8¶8* ;4069285);)6†8)4‡‡;1(‡9;48081;8:8‡1;48†85;4)485†528806*81 (‡9;48;(88;4(‡?34;48)4‡;161;:188;‡?;";
+    char mapping[26];
+    int freq[26] = {0};
+
+    countFrequencies(ciphertext, freq);
+    char mostFreqChar = findMostFrequent(freq);
+
+    for (int i = 0; i < 26; i++) {
+        int offset = (mostFreqChar - 'A' - i + 26) % 26;
+        mapping['A' + i] = 'A' + offset;
+    }
+
+    char plaintext[strlen(ciphertext) + 1];
+    decrypt(ciphertext, plaintext, mapping);
+
+    printf("Decrypted plaintext:\n%s\n", plaintext);
+
+    return 0;
+}
+

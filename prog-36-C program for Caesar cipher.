@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ALPHABET_SIZE 26
+
+// Function to encrypt plaintext using the affine Caesar cipher
+char affine_caesar_encrypt(char plaintext, int a, int b) {
+    if (plaintext >= 'A' && plaintext <= 'Z') {
+        return ((a * (plaintext - 'A') + b) % ALPHABET_SIZE) + 'A';
+    } else if (plaintext >= 'a' && plaintext <= 'z') {
+        return ((a * (plaintext - 'a') + b) % ALPHABET_SIZE) + 'a';
+    } else {
+        return plaintext; // Return character unchanged if not an alphabet character
+    }
+}
+
+// Function to decrypt ciphertext using the affine Caesar cipher
+char affine_caesar_decrypt(char ciphertext, int a, int b) {
+    int inverse_a = 0;
+    while ((a * inverse_a) % ALPHABET_SIZE != 1) {
+        inverse_a++;
+    }
+
+    if (ciphertext >= 'A' && ciphertext <= 'Z') {
+        return ((inverse_a * (ciphertext - 'A' - b + ALPHABET_SIZE)) % ALPHABET_SIZE) + 'A';
+    } else if (ciphertext >= 'a' && ciphertext <= 'z') {
+        return ((inverse_a * (ciphertext - 'a' - b + ALPHABET_SIZE)) % ALPHABET_SIZE) + 'a';
+    } else {
+        return ciphertext; // Return character unchanged if not an alphabet character
+    }
+}
+
+int main() {
+    char plaintext[] = "HelloWorld"; // Example plaintext
+    int a = 5, b = 8; // Example key values
+
+    printf("Plaintext: %s\n", plaintext);
+
+    // Encryption
+    printf("Encrypted: ");
+    for (int i = 0; plaintext[i] != '\0'; i++) {
+        printf("%c", affine_caesar_encrypt(plaintext[i], a, b));
+    }
+    printf("\n");
+
+    // Decryption
+    printf("Decrypted: ");
+    for (int i = 0; plaintext[i] != '\0'; i++) {
+        printf("%c", affine_caesar_decrypt(affine_caesar_encrypt(plaintext[i], a, b), a, b));
+    }
+    printf("\n");
+
+    return 0;
+}

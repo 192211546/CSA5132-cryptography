@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/dsa.h>
+#include <openssl/err.h>
+
+#define MESSAGE "Hello, World!"
+
+// Function to generate DSA key pair
+DSA* generate_dsa_keypair() {
+    DSA *dsa = DSA_new();
+    if (!DSA_generate_parameters_ex(dsa, 1024, NULL, 0, NULL, NULL, NULL)) {
+        fprintf(stderr, "Error generating DSA parameters\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!DSA_generate_key(dsa)) {
+        fprintf(stderr, "Error generating DSA key pair\n");
+        exit(EXIT_FAILURE);
+    }
+    return dsa;
+}
+
+// Function to sign a message using DSA
+DSA_SIG* dsa_sign(const char *message, DSA *dsa) {
+    unsigned char digest[SHA_DIGEST_LENGTH];
+    DSA_SIG *sig;
+
+    if (!DSA_sign(0, digest, SHA_DIGEST_LENGTH, digest, SHA_DIGEST_LENGTH, dsa, &sig)) {
+        fprintf(stderr, "Error signing message\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return sig;
+}
+
+// Function to verify a DSA signature
+int dsa_verify(const char *message, DSA_SIG *sig, DSA *dsa) {
+    unsigned char digest[SHA_DIGEST_LENGTH];
+    if (!DSA_verify(0, digest, SHA_DIGEST_LENGTH, digest, SHA_DIGEST_LENGTH, dsa, sig)) {
+        return 0; // Verification failed
+    }
+    return 1; // Verification successful
+}
+
+// Function to free memory allocated for DSA key pair and signature
+void cleanup(DSA *dsa, DSA_SIG *sig) {
+    if (dsa) DSA_free(dsa);
+    if (sig) DSA_SIG_free(sig);
+}
+
+int main() {
+    DSA *dsa_keypair = generate_dsa_keypair();
+
+    // Signing the message multiple times with DSA
+    DSA_SIG *signature1 = dsa_sign(MESSAGE, dsa_keypair);
+    DSA_SIG *signature2 = dsa_sign(MESSAGE, dsa_keypair);
+
+    // Verifying the signatures
+    int verify1 = dsa_verify(MESSAGE, signature1, dsa_keypair);
+    int verify2 = dsa_verify(MESSAGE, signature2, dsa_keypair);
+
+    if (verify1 && verify2) {
+        printf("Both signatures are valid.\n");
+    } else {
+        printf("Signatures verification failed.\n");
+    }
+
+    // Freeing memory
+    cleanup(dsa_keypair, signature1);
+    cleanup(NULL, signature2); // Passing NULL for key pair as it's already freed with signature1
+
+    return 0;
+}

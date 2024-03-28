@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define MOD 26 // Modulus for calculations (alphabet size)
+
+// Function to find the modular inverse of a number
+int mod_inverse(int a, int m) {
+    a = a % m;
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1) {
+            return x;
+        }
+    }
+    return -1; // Inverse does not exist
+}
+
+// Function to calculate the determinant of a 2x2 matrix
+int determinant_2x2(int matrix[2][2]) {
+    return (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]);
+}
+
+// Function to calculate the inverse of a 2x2 matrix
+void inverse_2x2(int matrix[2][2], int inverse[2][2]) {
+    int det = determinant_2x2(matrix);
+    int det_inv = mod_inverse(det, MOD);
+    inverse[0][0] = (matrix[1][1] * det_inv) % MOD;
+    inverse[1][1] = (matrix[0][0] * det_inv) % MOD;
+    inverse[0][1] = ((-matrix[0][1]) * det_inv) % MOD;
+    if (inverse[0][1] < 0)
+        inverse[0][1] += MOD;
+    inverse[1][0] = ((-matrix[1][0]) * det_inv) % MOD;
+    if (inverse[1][0] < 0)
+        inverse[1][0] += MOD;
+}
+
+// Function to calculate the modular matrix multiplication
+void matrix_multiply(int matrix1[2][2], int matrix2[2][1], int result[2][1]) {
+    result[0][0] = (matrix1[0][0] * matrix2[0][0] + matrix1[0][1] * matrix2[1][0]) % MOD;
+    result[1][0] = (matrix1[1][0] * matrix2[0][0] + matrix1[1][1] * matrix2[1][0]) % MOD;
+}
+
+// Function to perform a known plaintext attack on Hill cipher
+void known_plaintext_attack(int plaintext[][2], int ciphertext[][2], int result_key[][2]) {
+    int inv_plaintext[2][2], inv_ciphertext[2][2], key[2][2], temp[2][1], result[2][1];
+    inverse_2x2(plaintext, inv_plaintext);
+    inverse_2x2(ciphertext, inv_ciphertext);
+    matrix_multiply(inv_plaintext, inv_ciphertext, key);
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            result_key[i][j] = key[i][j];
+        }
+    }
+}
+
+int main() {
+    int plaintext[2][2] = {{6, 24}, {13, 16}}; // Example plaintext matrix
+    int ciphertext[2][2] = {{2, 18}, {5, 11}}; // Example ciphertext matrix
+    int key[2][2];
+
+    known_plaintext_attack(plaintext, ciphertext, key);
+
+    printf("Key matrix:\n");
+    printf("%d\t%d\n%d\t%d\n", key[0][0], key[0][1], key[1][0], key[1][1]);
+
+    return 0;
+}

@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/des.h>
+
+#define DATA_SIZE 8 // Size of each data block in bytes
+
+// Function to perform DES encryption
+void des_encrypt(const unsigned char *input, const unsigned char *key, unsigned char *output) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_ecb_encrypt((const_DES_cblock *)input, (DES_cblock *)output, &key_schedule, DES_ENCRYPT);
+}
+
+// Function to perform DES decryption
+void des_decrypt(const unsigned char *input, const unsigned char *key, unsigned char *output) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_ecb_encrypt((const_DES_cblock *)input, (DES_cblock *)output, &key_schedule, DES_DECRYPT);
+}
+
+int main() {
+    unsigned char plaintext[DATA_SIZE] = "12345678"; // 64-bit plaintext
+    unsigned char key[8] = "secret"; // 56-bit key (8 bytes)
+    unsigned char ciphertext[DATA_SIZE];
+    unsigned char decrypted[DATA_SIZE];
+
+    // Encrypt
+    des_encrypt(plaintext, key, ciphertext);
+
+    printf("Plaintext:  %s\n", plaintext);
+    printf("Ciphertext: ");
+    for (int i = 0; i < DATA_SIZE; ++i)
+        printf("%02X", ciphertext[i]);
+    printf("\n");
+
+    // Decrypt
+    des_decrypt(ciphertext, key, decrypted);
+
+    decrypted[DATA_SIZE] = '\0'; // Null-terminate decrypted string
+
+    printf("Decrypted:  %s\n", decrypted);
+
+    return 0;
+}

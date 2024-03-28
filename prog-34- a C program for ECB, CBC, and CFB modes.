@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/des.h>
+
+#define DATA_SIZE 8 // Size of each data block in bytes
+
+// Function to perform DES encryption in ECB mode
+void des_ecb_encrypt(const unsigned char *input, const unsigned char *key, unsigned char *output, int length) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_ecb_encrypt((const_DES_cblock *)input, (DES_cblock *)output, &key_schedule, DES_ENCRYPT);
+}
+
+// Function to perform DES decryption in ECB mode
+void des_ecb_decrypt(const unsigned char *input, const unsigned char *key, unsigned char *output, int length) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_ecb_encrypt((const_DES_cblock *)input, (DES_cblock *)output, &key_schedule, DES_DECRYPT);
+}
+
+// Function to perform DES encryption in CBC mode
+void des_cbc_encrypt(const unsigned char *input, const unsigned char *key, unsigned char *output, int length, const unsigned char *iv) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_cbc_encrypt(input, output, length, &key_schedule, (DES_cblock *)iv, DES_ENCRYPT);
+}
+
+// Function to perform DES decryption in CBC mode
+void des_cbc_decrypt(const unsigned char *input, const unsigned char *key, unsigned char *output, int length, const unsigned char *iv) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_cbc_encrypt(input, output, length, &key_schedule, (DES_cblock *)iv, DES_DECRYPT);
+}
+
+// Function to perform DES encryption in CFB mode
+void des_cfb_encrypt(const unsigned char *input, const unsigned char *key, unsigned char *output, int length, const unsigned char *iv) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_cfb_encrypt(input, output, 1, length, &key_schedule, (DES_cblock *)iv, DES_ENCRYPT);
+}
+
+// Function to perform DES decryption in CFB mode
+void des_cfb_decrypt(const unsigned char *input, const unsigned char *key, unsigned char *output, int length, const unsigned char *iv) {
+    DES_key_schedule key_schedule;
+    DES_set_key((const_DES_cblock *)key, &key_schedule);
+    DES_cfb_encrypt(input, output, 1, length, &key_schedule, (DES_cblock *)iv, DES_DECRYPT);
+}
+
+int main() {
+    unsigned char plaintext[DATA_SIZE] = "12345678"; // 64-bit plaintext
+    unsigned char key[8] = "secret"; // 56-bit key (8 bytes)
+    unsigned char iv[8] = "initial"; // Initialization vector for CBC mode (8 bytes)
+    unsigned char ciphertext[DATA_SIZE];
+    unsigned char decrypted[DATA_SIZE];
+
+    // ECB mode
+    printf("ECB Mode:\n");
+    des_ecb_encrypt(plaintext, key, ciphertext, DATA_SIZE);
+    printf("Encrypted: ");
+    for (int i = 0; i < DATA_SIZE; ++i)
+        printf("%02X", ciphertext[i]);
+    printf("\n");
+
+    des_ecb_decrypt(ciphertext, key, decrypted, DATA_SIZE);
+    printf("Decrypted: %s\n", decrypted);
+
+    // CBC mode
+    printf("\nCBC Mode:\n");
+    des_cbc_encrypt(plaintext, key, ciphertext, DATA_SIZE, iv);
+    printf("Encrypted: ");
+    for (int i = 0; i < DATA_SIZE; ++i)
+        printf("%02X", ciphertext[i]);
+    printf("\n");
+
+    des_cbc_decrypt(ciphertext, key, decrypted, DATA_SIZE, iv);
+    printf("Decrypted: %s\n", decrypted);
+
+    // CFB mode
+    printf("\nCFB Mode:\n");
+    des_cfb_encrypt(plaintext, key, ciphertext, DATA_SIZE, iv);
+    printf("Encrypted: ");
+    for (int i = 0; i < DATA_SIZE; ++i)
+        printf("%02X", ciphertext[i]);
+    printf("\n");
+
+    des_cfb_decrypt(ciphertext, key, decrypted, DATA_SIZE, iv);
+    printf("Decrypted: %s\n", decrypted);
+
+    return 0;
+}

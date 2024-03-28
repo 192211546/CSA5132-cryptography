@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function to encrypt plaintext using the one-time pad Vigenère cipher
+void vigenere_encrypt(const char *plaintext, const int *key, char *ciphertext) {
+    int len = strlen(plaintext);
+    for (int i = 0; i < len; ++i) {
+        ciphertext[i] = (plaintext[i] - 'A' + key[i]) % 26 + 'A'; // Apply shift based on key
+    }
+    ciphertext[len] = '\0'; // Null-terminate the string
+}
+
+// Function to decrypt ciphertext using the one-time pad Vigenère cipher
+void vigenere_decrypt(const char *ciphertext, const int *key, char *plaintext) {
+    int len = strlen(ciphertext);
+    for (int i = 0; i < len; ++i) {
+        plaintext[i] = (ciphertext[i] - 'A' - key[i] + 26) % 26 + 'A'; // Apply reverse shift based on key
+    }
+    plaintext[len] = '\0'; // Null-terminate the string
+}
+
+int main() {
+    const char *plaintext = "HELLOWORLD"; // Example plaintext
+    const int key[] = {3, 19, 5}; // Example key (shift values)
+
+    int len = strlen(plaintext);
+    char ciphertext[len + 1];
+    char decrypted[len + 1];
+
+    // Encrypt
+    vigenere_encrypt(plaintext, key, ciphertext);
+    printf("Ciphertext: %s\n", ciphertext);
+
+    // Decrypt
+    vigenere_decrypt(ciphertext, key, decrypted);
+    printf("Decrypted: %s\n", decrypted);
+
+    return 0;
+}
